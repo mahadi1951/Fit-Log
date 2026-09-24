@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+
 import { Workout } from "@/types/apps.typs";
 
 interface PlanContextType {
@@ -20,13 +21,16 @@ const PlanContext = createContext<PlanContextType | undefined>(undefined);
 
 export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
   const [todaysPlan, setTodaysPlan] = useState<Workout[]>([]);
+
   const [savedWorkouts, setSavedWorkouts] = useState<Workout[]>([]);
+
   const [hydrated, setHydrated] = useState(false);
 
-  // Load data
+  // Load data from localStorage
   useEffect(() => {
     try {
       const savedPlan = localStorage.getItem("todaysPlan");
+
       const savedItems = localStorage.getItem("savedWorkouts");
 
       if (savedPlan) {
@@ -43,21 +47,21 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  // Save today's plan
+  // Save Today's Plan
   useEffect(() => {
     if (!hydrated) return;
 
     localStorage.setItem("todaysPlan", JSON.stringify(todaysPlan));
   }, [todaysPlan, hydrated]);
 
-  // Save saved workouts
+  // Save Saved Workouts
   useEffect(() => {
     if (!hydrated) return;
 
     localStorage.setItem("savedWorkouts", JSON.stringify(savedWorkouts));
   }, [savedWorkouts, hydrated]);
 
-  // Add to today's plan
+  // Add workout to Today's Plan
   const addToPlan = (workout: Workout) => {
     if (todaysPlan.some((item) => item.id === workout.id)) {
       return false;
@@ -72,12 +76,12 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
     return true;
   };
 
-  // Remove from today's plan
+  // Remove workout from Today's Plan
   const removeFromPlan = (id: number) => {
     setTodaysPlan((previous) => previous.filter((item) => item.id !== id));
   };
 
-  // Check plan
+  // Check Today's Plan
   const isInPlan = (id: number) => {
     return todaysPlan.some((item) => item.id === id);
   };
@@ -98,7 +102,7 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
     setSavedWorkouts((previous) => previous.filter((item) => item.id !== id));
   };
 
-  // Check saved
+  // Check saved workout
   const isSaved = (id: number) => {
     return savedWorkouts.some((item) => item.id === id);
   };
@@ -108,9 +112,11 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         todaysPlan,
         savedWorkouts,
+
         addToPlan,
         removeFromPlan,
         isInPlan,
+
         saveWorkout,
         removeSavedWorkout,
         isSaved,

@@ -1,11 +1,10 @@
 "use client";
 
-import logo from "@/assets/logo.png";
-
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import logo from "@/assets/logo.png";
 import { usePlan } from "@/context/PlanContext";
 
 const Navbar = () => {
@@ -15,11 +14,11 @@ const Navbar = () => {
 
   const Links = (
     <>
-      <li className={pathName === "/" ? "text-[#83A807]" : ""}>
+      <li className={pathName === "/" ? "text-[#ccff00]" : ""}>
         <Link href="/">Workouts</Link>
       </li>
 
-      <li className={pathName === "/myplan" ? "text-[#83A807]" : ""}>
+      <li className={pathName === "/myplan" ? "text-[#ccff00]" : ""}>
         <Link href="/myplan">My Plan</Link>
       </li>
     </>
@@ -30,8 +29,8 @@ const Navbar = () => {
       <div className="navbar container mx-auto h-16 px-3 sm:px-5 lg:px-8">
         {/* Left */}
         <div className="navbar-start">
+          {/* Mobile */}
           <div className="dropdown flex items-center gap-2">
-            {/* Mobile menu */}
             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
               <svg
                 aria-label="Menu"
@@ -50,14 +49,12 @@ const Navbar = () => {
               </svg>
             </div>
 
-            {/* Mobile logo */}
             <Image
               className="h-7 w-auto sm:h-8 lg:hidden"
               src={logo}
               alt="Logo"
             />
 
-            {/* Mobile links */}
             <ul
               tabIndex={-1}
               className="menu menu-sm dropdown-content z-20 mt-20 w-52 rounded-box bg-base-100 p-2 font-semibold shadow"
@@ -66,7 +63,7 @@ const Navbar = () => {
             </ul>
           </div>
 
-          {/* Desktop logo */}
+          {/* Desktop Logo */}
           <Link className="hidden gap-4 lg:flex" href="/">
             <Image
               src={logo}
@@ -88,11 +85,11 @@ const Navbar = () => {
           <ul className="flex items-center gap-2 font-semibold sm:gap-4">
             {/* Plan */}
             <li className="flex items-center gap-2 sm:gap-4">
-              <Link href="/myplan">Plan</Link>
+              <Link href="/my-plan">Plan</Link>
 
               <Link
-                href="/myplan"
-                className="rounded-full bg-[#83A807] px-3 py-1"
+                href="/my-plan"
+                className="rounded-full bg-[#ccff00] px-3 py-1 text-black"
               >
                 {todaysPlan.length}
               </Link>
@@ -100,11 +97,11 @@ const Navbar = () => {
 
             {/* Saved */}
             <li className="flex items-center gap-2 sm:gap-4">
-              <Link href="/myplan">Saved</Link>
+              <Link href="/my-plan">Saved</Link>
 
               <Link
-                href="/myplan"
-                className="rounded-full border border-[#83A807] px-3 py-1"
+                href="/my-plan"
+                className="rounded-full border border-[#ccff00] px-3 py-1 text-[#ccff00]"
               >
                 {savedWorkouts.length}
               </Link>

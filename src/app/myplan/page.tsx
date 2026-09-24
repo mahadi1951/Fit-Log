@@ -1,8 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import { ChevronDown, Dumbbell, Clock, Flame } from "lucide-react";
 import { toast } from "react-toastify";
 
 import { usePlan } from "@/context/PlanContext";
@@ -10,163 +8,169 @@ import TodaysPlanCard from "@/components/shared/TodaysPlanCard";
 import SavedWorkoutCard from "@/components/shared/SaveWorkoutCard";
 
 type SortBy = "duration" | "calories" | "rating";
+type ActiveTab = "today" | "saved";
 
 const MyPlanPage = () => {
   const { todaysPlan, savedWorkouts, removeFromPlan, removeSavedWorkout } =
     usePlan();
 
   const [sortBy, setSortBy] = useState<SortBy>("duration");
-  const [activeTab, setActiveTab] = useState<"today" | "saved">("today");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("today");
 
+  // Current tab er workout
   const currentWorkouts = activeTab === "today" ? todaysPlan : savedWorkouts;
 
-  // Total exercises
+  // Current tab er workout sort
+  const sortedWorkouts = useMemo(() => {
+    return [...currentWorkouts].sort((a, b) => {
+      return Number(b[sortBy]) - Number(a[sortBy]);
+    });
+  }, [currentWorkouts, sortBy]);
+
+  // Remove workout
+  const handleRemove = (id: number) => {
+    if (activeTab === "today") {
+      removeFromPlan(id);
+      toast.info("Workout removed from today's plan.");
+    } else {
+      removeSavedWorkout(id);
+      toast.info("Workout removed from saved.");
+    }
+  };
+
+  // Today's Plan statistics
   const totalExercises = todaysPlan.length;
 
-  // Total minutes
   const totalMinutes = todaysPlan.reduce(
-    (total, workout) => total + workout.duration,
+    (total, workout) => total + Number(workout.duration || 0),
     0,
   );
 
-  // Total calories
   const totalCalories = todaysPlan.reduce(
     (total, workout) => total + Number(workout.calories || 0),
     0,
   );
 
-  // Sort workouts
-  const sortedWorkouts = useMemo(() => {
-    return [...todaysPlan].sort((a, b) => {
-      return b[sortBy] - a[sortBy];
-    });
-  }, [todaysPlan, sortBy]);
-
-  // Remove workout
-  const handleRemove = (id: number) => {
-    removeFromPlan(id);
-
-    toast.info("Workout removed from today's plan.");
-  };
-
   return (
-    <main className="min-h-screen bg-[#0B0D10] px-3 py-10 text-white sm:px-5 lg:px-8">
+    <main className="min-h-screen bg-[#080A0F] px-4 py-10 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-black uppercase sm:text-5xl">MY PLAN</h1>
+          <p className="mb-2 text-sm font-bold tracking-[0.2em] text-[#ccff00]">
+            MY WORKOUTS
+          </p>
 
-          <p className="mt-3 max-w-xl text-sm text-gray-500 sm:text-base">
-            Build your workout plan and keep track of your daily training.
+          <h1 className="text-3xl font-black uppercase sm:text-4xl">MY PLAN</h1>
+
+          <p className="mt-2 text-sm text-gray-500">
+            Manage your workouts and saved exercises.
           </p>
         </div>
 
-        {/* Metrics */}
+        {/* Statistics */}
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {/* Exercises */}
           <div className="rounded-2xl border border-gray-800 bg-[#10131A] p-5">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm uppercase text-gray-500">Exercises</span>
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
+              Exercises
+            </p>
 
-              <Dumbbell className="h-5 w-5 text-[#ccff00]" />
-            </div>
-
-            <h2 className="text-3xl font-black">{totalExercises}</h2>
+            <h2 className="mt-2 text-3xl font-black text-[#ccff00]">
+              {totalExercises}
+            </h2>
           </div>
 
-          {/* Minutes */}
           <div className="rounded-2xl border border-gray-800 bg-[#10131A] p-5">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm uppercase text-gray-500">Minutes</span>
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
+              Minutes
+            </p>
 
-              <Clock className="h-5 w-5 text-[#ccff00]" />
-            </div>
-
-            <h2 className="text-3xl font-black">{totalMinutes}</h2>
+            <h2 className="mt-2 text-3xl font-black text-[#ccff00]">
+              {totalMinutes}
+            </h2>
           </div>
 
-          {/* Calories */}
           <div className="rounded-2xl border border-gray-800 bg-[#10131A] p-5">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm uppercase text-gray-500">Calories</span>
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
+              Calories
+            </p>
 
-              <Flame className="h-5 w-5 text-[#ccff00]" />
-            </div>
-
-            <h2 className="text-3xl font-black">{totalCalories}</h2>
+            <h2 className="mt-2 text-3xl font-black text-[#ccff00]">
+              {totalCalories}
+            </h2>
           </div>
         </div>
 
         {/* Tabs + Sort */}
-        <div className="mb-6 flex flex-col justify-between gap-4 border-b border-gray-800 pb-4 sm:flex-row sm:items-center">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Tabs */}
-          <div className="flex gap-6">
-            {/* Today's Plan */}{" "}
+          <div className="flex w-full rounded-xl border border-gray-800 bg-[#10131A] p-1 sm:w-auto">
             <button
               type="button"
               onClick={() => setActiveTab("today")}
-              className={`border-b-2 pb-2 text-sm font-bold uppercase transition ${activeTab === "today" ? "border-[#ccff00] text-[#ccff00]" : "border-transparent text-gray-500 hover:text-white"}`}
+              className={`flex-1 rounded-lg px-5 py-2.5 text-sm font-bold uppercase transition sm:flex-none ${
+                activeTab === "today"
+                  ? "bg-[#ccff00] text-black"
+                  : "text-gray-400 hover:text-white"
+              }`}
             >
-              {" "}
-              Todays Plan{" "}
-            </button>{" "}
-            {/* Saved */}{" "}
+              Todays Plan
+            </button>
+
             <button
               type="button"
               onClick={() => setActiveTab("saved")}
-              className={`border-b-2 pb-2 text-sm font-bold uppercase transition ${activeTab === "saved" ? "border-[#ccff00] text-[#ccff00]" : "border-transparent text-gray-500 hover:text-white"}`}
+              className={`flex-1 rounded-lg px-5 py-2.5 text-sm font-bold uppercase transition sm:flex-none ${
+                activeTab === "saved"
+                  ? "bg-[#ccff00] text-black"
+                  : "text-gray-400 hover:text-white"
+              }`}
             >
-              {" "}
-              Saved{" "}
+              Saved
             </button>
           </div>
 
           {/* Sort */}
-          <div className="relative">
-            <select
-              value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as SortBy)}
-              className="appearance-none rounded-lg border border-gray-700 bg-[#10131A] px-4 py-2 pr-10 text-sm text-white outline-none focus:border-[#ccff00]"
-            >
-              <option value="duration">Duration</option>
-
-              <option value="calories">Calories</option>
-
-              <option value="rating">Rating</option>
-            </select>
-
-            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          </div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortBy)}
+            className="rounded-xl border border-gray-800 bg-[#10131A] px-4 py-3 text-sm font-semibold text-white outline-none focus:border-[#ccff00]"
+          >
+            <option value="duration">Sort by Duration</option>
+            <option value="calories">Sort by Calories</option>
+            <option value="rating">Sort by Rating</option>
+          </select>
         </div>
 
         {/* Workout List */}
-        {sortedWorkouts.length > 0 ? (
-          <div className="space-y-4">
-            {sortedWorkouts.map((workout) => (
-              <TodaysPlanCard
-                key={workout.id}
-                workout={workout}
-                onRemove={handleRemove}
-              />
-            ))}
-          </div>
-        ) : (
-          /* Empty State */
-          <div className="rounded-2xl border border-dashed border-gray-700 bg-[#10131A] px-5 py-16 text-center">
-            <h2 className="text-2xl font-black uppercase">
-              Your plan is empty
+        {sortedWorkouts.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-gray-800 bg-[#10131A] py-20 text-center">
+            <h2 className="text-xl font-black uppercase text-white">
+              NOTHING HERE YET
             </h2>
 
-            <p className="mx-auto mt-3 max-w-md text-sm text-gray-500">
-              Browse the library and add a lift to get today moving.
+            <p className="mt-2 text-sm text-gray-500">
+              {activeTab === "today"
+                ? "Add some workouts to your today's plan."
+                : "Save some workouts to see them here."}
             </p>
-
-            <Link
-              href="/#library"
-              className="mt-6 inline-flex rounded-xl bg-[#ccff00] px-6 py-3 text-sm font-black uppercase text-black transition hover:bg-[#b8eb00]"
-            >
-              Go to workouts
-            </Link>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {sortedWorkouts.map((workout) =>
+              activeTab === "today" ? (
+                <TodaysPlanCard
+                  key={workout.id}
+                  workout={workout}
+                  onRemove={handleRemove}
+                />
+              ) : (
+                <SavedWorkoutCard
+                  key={workout.id}
+                  workout={workout}
+                  onRemove={handleRemove}
+                />
+              ),
+            )}
           </div>
         )}
       </div>
