@@ -1,11 +1,17 @@
 "use client";
+
 import logo from "@/assets/logo.png";
+
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { usePlan } from "@/context/PlanContext";
+
 const Navbar = () => {
   const pathName = usePathname();
+
+  const { todaysPlan, savedWorkouts } = usePlan();
 
   const Links = (
     <>
@@ -18,12 +24,14 @@ const Navbar = () => {
       </li>
     </>
   );
+
   return (
-    <div className=" sticky top-0 z-50 h-16 bg-[#0B0D10] border-b border-[#1D2025]">
-      <div className="navbar container h-16 mx-auto px-3 sm:px-5 lg:px-8">
+    <div className="sticky top-0 z-50 h-16 border-b border-[#1D2025] bg-[#0B0D10]">
+      <div className="navbar container mx-auto h-16 px-3 sm:px-5 lg:px-8">
+        {/* Left */}
         <div className="navbar-start">
           <div className="dropdown flex items-center gap-2">
-            {/* Mobile Menu Button */}
+            {/* Mobile menu */}
             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
               <svg
                 aria-label="Menu"
@@ -42,54 +50,63 @@ const Navbar = () => {
               </svg>
             </div>
 
-            {/* Mobile Logo */}
+            {/* Mobile logo */}
             <Image
-              className="lg:hidden h-7 sm:h-8 w-auto"
+              className="h-7 w-auto sm:h-8 lg:hidden"
               src={logo}
               alt="Logo"
             />
 
-            {/* Mobile Menu */}
+            {/* Mobile links */}
             <ul
               tabIndex={-1}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-2 mt-20 w-52 p-2 shadow font-semibold"
+              className="menu menu-sm dropdown-content z-20 mt-20 w-52 rounded-box bg-base-100 p-2 font-semibold shadow"
             >
               {Links}
             </ul>
           </div>
 
-          {/* Desktop Logo */}
-          <div className="">
-            <Link className="lg:flex hidden gap-4" href="/">
-              <Image
+          {/* Desktop logo */}
+          <Link className="hidden gap-4 lg:flex" href="/">
+            <Image
               src={logo}
               alt="Logo"
-              className="hidden lg:flex h-auto w-auto"
+              className="hidden h-auto w-auto lg:flex"
             />
+
             <h2 className="font-semibold">FITLOG</h2>
-            </Link>
-          </div>
+          </Link>
         </div>
 
-        {/* Desktop Navigation */}
+        {/* Middle */}
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1 font-semibold">{Links}</ul>
         </div>
 
-        {/* Login & Sign Up */}
+        {/* Right */}
         <div className="navbar-end">
-          <ul className="flex gap-2 sm:gap-4 content-center items-center font-semibold">
-            <li className="flex items-center gap-4">
-              <Link href="/myplan"> Plan</Link>
-              <Link className="px-3 py-1 bg-[#83A807] rounded-full" href="/">
-                0
+          <ul className="flex items-center gap-2 font-semibold sm:gap-4">
+            {/* Plan */}
+            <li className="flex items-center gap-2 sm:gap-4">
+              <Link href="/myplan">Plan</Link>
+
+              <Link
+                href="/myplan"
+                className="rounded-full bg-[#83A807] px-3 py-1"
+              >
+                {todaysPlan.length}
               </Link>
             </li>
 
-            <li className="flex items-center gap-4">
-              <Link href="/"> Saved</Link>
-              <Link className="px-3 py-1 bg-[#83A807] rounded-full" href="/">
-                0
+            {/* Saved */}
+            <li className="flex items-center gap-2 sm:gap-4">
+              <Link href="/myplan">Saved</Link>
+
+              <Link
+                href="/myplan"
+                className="rounded-full border border-[#83A807] px-3 py-1"
+              >
+                {savedWorkouts.length}
               </Link>
             </li>
           </ul>

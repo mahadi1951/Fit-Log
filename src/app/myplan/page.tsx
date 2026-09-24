@@ -1,105 +1,176 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ChevronDown, Dumbbell, Clock, Flame } from "lucide-react";
+import { toast } from "react-toastify";
 
-import { WorkoutCard } from '@/components/shared/WorkCard';
-import { Workout } from '@/types/apps.typs';
-import { ChevronDown } from 'lucide-react';
+import { usePlan } from "@/context/PlanContext";
+import TodaysPlanCard from "@/components/shared/TodaysPlanCard";
+import SavedWorkoutCard from "@/components/shared/SaveWorkoutCard";
 
-interface MyPlanSectionProps {
-  workouts?: Workout[];
-}
+type SortBy = "duration" | "calories" | "rating";
 
-export const MyPlanPage: React.FC<MyPlanSectionProps> = ({ workouts = [] }) => {
-  const [activeTab, setActiveTab] = useState<'today' | 'saved'>('saved');
+const MyPlanPage = () => {
+  const { todaysPlan, savedWorkouts, removeFromPlan, removeSavedWorkout } =
+    usePlan();
 
-  // Calculations based on workouts array
-  const totalExercises = workouts.length;
-  const totalMinutes = workouts.reduce((sum, item) => sum + item.duration, 0);
+  const [sortBy, setSortBy] = useState<SortBy>("duration");
+  const [activeTab, setActiveTab] = useState<"today" | "saved">("today");
+
+  const currentWorkouts = activeTab === "today" ? todaysPlan : savedWorkouts;
+
+  // Total exercises
+  const totalExercises = todaysPlan.length;
+
+  // Total minutes
+  const totalMinutes = todaysPlan.reduce(
+    (total, workout) => total + workout.duration,
+    0,
+  );
+
+  // Total calories
+  const totalCalories = todaysPlan.reduce(
+    (total, workout) => total + Number(workout.calories || 0),
+    0,
+  );
+
+  // Sort workouts
+  const sortedWorkouts = useMemo(() => {
+    return [...todaysPlan].sort((a, b) => {
+      return b[sortBy] - a[sortBy];
+    });
+  }, [todaysPlan, sortBy]);
+
+  // Remove workout
+  const handleRemove = (id: number) => {
+    removeFromPlan(id);
+
+    toast.info("Workout removed from today's plan.");
+  };
 
   return (
-    <div className="w-full max-w-4xl bg-[#0b0d12] text-white p-6 rounded-xl min-h-screen container mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-black uppercase tracking-wider">MY PLAN</h1>
-        <p className="text-gray-400 text-sm mt-1">
-          Cap of five lifts for today. Finish them, then load more.
-        </p>
-      </div>
+    <main className="min-h-screen bg-[#0B0D10] px-3 py-10 text-white sm:px-5 lg:px-8">
+      <div className="mx-auto max-w-6xl">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-black uppercase sm:text-5xl">MY PLAN</h1>
 
-      {/* Stats Card */}
-      <div className="bg-[#12141c] rounded-2xl p-6 border border-gray-800 flex justify-between items-center mb-6">
-        <div className="flex-1">
-          <p className="text-gray-400 text-xs font-semibold mb-1">Exercises</p>
-          <p className="text-4xl font-extrabold text-[#ccff00]">{totalExercises}</p>
-        </div>
-        <div className="flex-1">
-          <p className="text-gray-400 text-xs font-semibold mb-1">Minutes</p>
-          <p className="text-4xl font-extrabold text-white">{totalMinutes}</p>
-        </div>
-        <div className="flex-1">
-          <p className="text-gray-400 text-xs font-semibold mb-1">Calories</p>
-          <p className="text-4xl font-extrabold text-white">190</p>
-        </div>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="flex items-center justify-between mb-6">
-        {/* Toggle Buttons */}
-        <div className="bg-[#12141c] p-1 rounded-xl border border-gray-800 flex items-center">
-          <button
-            onClick={() => setActiveTab('today')}
-            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'today'
-                ? 'bg-[#1c202d] text-white'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Today,s Plan
-          </button>
-          <button
-            onClick={() => setActiveTab('saved')}
-            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'saved'
-                ? 'bg-[#1c202d] text-white'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Saved
-          </button>
-        </div>
-
-        {/* Sort Dropdown */}
-        <div className="flex items-center gap-2 text-sm text-gray-400">
-          <span>Sort By</span>
-          <button className="bg-[#12141c] border border-gray-800 px-3 py-1.5 rounded-lg flex items-center gap-2 text-white font-medium">
-            Duration <ChevronDown className="w-4 h-4 text-gray-400" />
-          </button>
-        </div>
-      </div>
-
-      {/* Content Area */}
-      {workouts.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {workouts.map((workout) => (
-            <WorkoutCard key={workout.id} workout={workout} />
-          ))}
-        </div>
-      ) : (
-        /* Empty State Box */
-        <div className="border border-dashed border-gray-800 rounded-2xl py-20 px-4 text-center bg-[#0d0f17]">
-          <h2 className="text-xl font-black uppercase tracking-wide mb-2">
-            NOTHING HERE YET
-          </h2>
-          <p className="text-gray-400 text-sm mb-6">
-            Browse the library and add a lift to get today moving.
+          <p className="mt-3 max-w-xl text-sm text-gray-500 sm:text-base">
+            Build your workout plan and keep track of your daily training.
           </p>
-          <button className="bg-[#ccff00] text-black font-bold px-6 py-2.5 rounded-full hover:bg-[#b3e600] transition-colors">
-            Go to workouts
-          </button>
         </div>
-      )}
-    </div>
+
+        {/* Metrics */}
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {/* Exercises */}
+          <div className="rounded-2xl border border-gray-800 bg-[#10131A] p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-sm uppercase text-gray-500">Exercises</span>
+
+              <Dumbbell className="h-5 w-5 text-[#ccff00]" />
+            </div>
+
+            <h2 className="text-3xl font-black">{totalExercises}</h2>
+          </div>
+
+          {/* Minutes */}
+          <div className="rounded-2xl border border-gray-800 bg-[#10131A] p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-sm uppercase text-gray-500">Minutes</span>
+
+              <Clock className="h-5 w-5 text-[#ccff00]" />
+            </div>
+
+            <h2 className="text-3xl font-black">{totalMinutes}</h2>
+          </div>
+
+          {/* Calories */}
+          <div className="rounded-2xl border border-gray-800 bg-[#10131A] p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-sm uppercase text-gray-500">Calories</span>
+
+              <Flame className="h-5 w-5 text-[#ccff00]" />
+            </div>
+
+            <h2 className="text-3xl font-black">{totalCalories}</h2>
+          </div>
+        </div>
+
+        {/* Tabs + Sort */}
+        <div className="mb-6 flex flex-col justify-between gap-4 border-b border-gray-800 pb-4 sm:flex-row sm:items-center">
+          {/* Tabs */}
+          <div className="flex gap-6">
+            {/* Today's Plan */}{" "}
+            <button
+              type="button"
+              onClick={() => setActiveTab("today")}
+              className={`border-b-2 pb-2 text-sm font-bold uppercase transition ${activeTab === "today" ? "border-[#ccff00] text-[#ccff00]" : "border-transparent text-gray-500 hover:text-white"}`}
+            >
+              {" "}
+              Todays Plan{" "}
+            </button>{" "}
+            {/* Saved */}{" "}
+            <button
+              type="button"
+              onClick={() => setActiveTab("saved")}
+              className={`border-b-2 pb-2 text-sm font-bold uppercase transition ${activeTab === "saved" ? "border-[#ccff00] text-[#ccff00]" : "border-transparent text-gray-500 hover:text-white"}`}
+            >
+              {" "}
+              Saved{" "}
+            </button>
+          </div>
+
+          {/* Sort */}
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as SortBy)}
+              className="appearance-none rounded-lg border border-gray-700 bg-[#10131A] px-4 py-2 pr-10 text-sm text-white outline-none focus:border-[#ccff00]"
+            >
+              <option value="duration">Duration</option>
+
+              <option value="calories">Calories</option>
+
+              <option value="rating">Rating</option>
+            </select>
+
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          </div>
+        </div>
+
+        {/* Workout List */}
+        {sortedWorkouts.length > 0 ? (
+          <div className="space-y-4">
+            {sortedWorkouts.map((workout) => (
+              <TodaysPlanCard
+                key={workout.id}
+                workout={workout}
+                onRemove={handleRemove}
+              />
+            ))}
+          </div>
+        ) : (
+          /* Empty State */
+          <div className="rounded-2xl border border-dashed border-gray-700 bg-[#10131A] px-5 py-16 text-center">
+            <h2 className="text-2xl font-black uppercase">
+              Your plan is empty
+            </h2>
+
+            <p className="mx-auto mt-3 max-w-md text-sm text-gray-500">
+              Browse the library and add a lift to get today moving.
+            </p>
+
+            <Link
+              href="/#library"
+              className="mt-6 inline-flex rounded-xl bg-[#ccff00] px-6 py-3 text-sm font-black uppercase text-black transition hover:bg-[#b8eb00]"
+            >
+              Go to workouts
+            </Link>
+          </div>
+        )}
+      </div>
+    </main>
   );
 };
 
