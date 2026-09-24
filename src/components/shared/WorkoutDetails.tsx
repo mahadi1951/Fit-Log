@@ -141,7 +141,7 @@ const WorkoutDetails: React.FC<WorkoutDetailsProps> = ({ workout }) => {
                 </span>
 
                 <span className="text-sm font-semibold">
-                  {workout.calories || 0} kcal
+                  {workout.caloriesBurned || 0} kcal
                 </span>
               </div>
 

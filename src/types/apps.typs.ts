@@ -9,7 +9,8 @@ export interface Workout {
   sets: number;
   reps: string;
   duration: number;
-  calories: number;
+  caloriesBurned
+: number;
   rating: number;
   instructions: string[];
 }

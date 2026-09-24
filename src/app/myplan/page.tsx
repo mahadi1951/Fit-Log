@@ -39,14 +39,14 @@ const MyPlanPage = () => {
   };
 
   // Today's Plan statistics
-  const totalExercises = todaysPlan.length;
+  const totalExercises = currentWorkouts.length;
 
-  const totalMinutes = todaysPlan.reduce(
+  const totalMinutes = currentWorkouts.reduce(
     (total, workout) => total + Number(workout.duration || 0),
     0,
   );
 
-  const totalCalories = todaysPlan.reduce(
+  const totalCalories = currentWorkouts.reduce(
     (total, workout) => total + Number(workout.calories || 0),
     0,
   );

@@ -85,10 +85,10 @@ const Navbar = () => {
           <ul className="flex items-center gap-2 font-semibold sm:gap-4">
             {/* Plan */}
             <li className="flex items-center gap-2 sm:gap-4">
-              <Link href="/my-plan">Plan</Link>
+              <Link href="/myplan">Plan</Link>
 
               <Link
-                href="/my-plan"
+                href="/myplan"
                 className="rounded-full bg-[#ccff00] px-3 py-1 text-black"
               >
                 {todaysPlan.length}
@@ -97,11 +97,11 @@ const Navbar = () => {
 
             {/* Saved */}
             <li className="flex items-center gap-2 sm:gap-4">
-              <Link href="/my-plan">Saved</Link>
+              <Link href="/myplan">Saved</Link>
 
               <Link
-                href="/my-plan"
-                className="rounded-full border border-[#ccff00] px-3 py-1 text-[#ccff00]"
+                href="/myplan"
+                className="rounded-full bg-[#ccff00] px-3 py-1 text-black"
               >
                 {savedWorkouts.length}
               </Link>
