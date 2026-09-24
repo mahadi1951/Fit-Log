@@ -20,46 +20,51 @@ interface PlanContextType {
 const PlanContext = createContext<PlanContextType | undefined>(undefined);
 
 export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
-  const [todaysPlan, setTodaysPlan] = useState<Workout[]>([]);
+  const [todaysPlan, setTodaysPlan] = useState<Workout[]>(() => {
+    if (typeof window === "undefined") {
+      return [];
+    }
 
-  const [savedWorkouts, setSavedWorkouts] = useState<Workout[]>([]);
-
-  const [hydrated, setHydrated] = useState(false);
-
-  // Load data from localStorage
-  useEffect(() => {
     try {
       const savedPlan = localStorage.getItem("todaysPlan");
 
+      return savedPlan ? JSON.parse(savedPlan) : [];
+    } catch (error) {
+      console.error("Failed to load today's plan:", error);
+      return [];
+    }
+  });
+
+  const [savedWorkouts, setSavedWorkouts] = useState<Workout[]>(() => {
+    if (typeof window === "undefined") {
+      return [];
+    }
+
+    try {
       const savedItems = localStorage.getItem("savedWorkouts");
 
-      if (savedPlan) {
-        setTodaysPlan(JSON.parse(savedPlan));
-      }
-
-      if (savedItems) {
-        setSavedWorkouts(JSON.parse(savedItems));
-      }
+      return savedItems ? JSON.parse(savedItems) : [];
     } catch (error) {
-      console.error("Failed to load workout data:", error);
-    } finally {
-      setHydrated(true);
+      console.error("Failed to load saved workouts:", error);
+      return [];
     }
-  }, []);
+  });
 
   // Save Today's Plan
   useEffect(() => {
-    if (!hydrated) return;
-
-    localStorage.setItem("todaysPlan", JSON.stringify(todaysPlan));
-  }, [todaysPlan, hydrated]);
+    localStorage.setItem(
+      "todaysPlan",
+      JSON.stringify(todaysPlan)
+    );
+  }, [todaysPlan]);
 
   // Save Saved Workouts
   useEffect(() => {
-    if (!hydrated) return;
-
-    localStorage.setItem("savedWorkouts", JSON.stringify(savedWorkouts));
-  }, [savedWorkouts, hydrated]);
+    localStorage.setItem(
+      "savedWorkouts",
+      JSON.stringify(savedWorkouts)
+    );
+  }, [savedWorkouts]);
 
   // Add workout to Today's Plan
   const addToPlan = (workout: Workout) => {
@@ -78,7 +83,9 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Remove workout from Today's Plan
   const removeFromPlan = (id: number) => {
-    setTodaysPlan((previous) => previous.filter((item) => item.id !== id));
+    setTodaysPlan((previous) =>
+      previous.filter((item) => item.id !== id)
+    );
   };
 
   // Check Today's Plan
@@ -99,7 +106,9 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Remove saved workout
   const removeSavedWorkout = (id: number) => {
-    setSavedWorkouts((previous) => previous.filter((item) => item.id !== id));
+    setSavedWorkouts((previous) =>
+      previous.filter((item) => item.id !== id)
+    );
   };
 
   // Check saved workout

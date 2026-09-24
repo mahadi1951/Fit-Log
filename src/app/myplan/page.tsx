@@ -7,7 +7,7 @@ import { usePlan } from "@/context/PlanContext";
 import TodaysPlanCard from "@/components/shared/TodaysPlanCard";
 import SavedWorkoutCard from "@/components/shared/SaveWorkoutCard";
 
-type SortBy = "duration" | "calories" | "rating";
+type SortBy = "duration" | "caloriesBurned" | "rating";
 type ActiveTab = "today" | "saved";
 
 const MyPlanPage = () => {
@@ -47,7 +47,8 @@ const MyPlanPage = () => {
   );
 
   const totalCalories = currentWorkouts.reduce(
-    (total, workout) => total + Number(workout.calories || 0),
+    (total, workout) => total + Number(workout.caloriesBurned
+ || 0),
     0,
   );
 
@@ -136,7 +137,7 @@ const MyPlanPage = () => {
             className="rounded-xl border border-gray-800 bg-[#10131A] px-4 py-3 text-sm font-semibold text-white outline-none focus:border-[#ccff00]"
           >
             <option value="duration">Sort by Duration</option>
-            <option value="calories">Sort by Calories</option>
+            <option value="caloriesBurned">Sort by Calories</option>
             <option value="rating">Sort by Rating</option>
           </select>
         </div>
