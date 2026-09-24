@@ -178,36 +178,20 @@ const WorkoutDetails: React.FC<WorkoutDetailsProps> = ({ workout }) => {
             <button
               type="button"
               onClick={handleAddToPlan}
-              disabled={alreadyAdded || planIsFull}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase transition ${
-                alreadyAdded || planIsFull
-                  ? "cursor-not-allowed bg-gray-700 text-gray-400"
-                  : "bg-[#ccff00] text-black hover:bg-[#b8eb00]"
-              }`}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold  transition bg-[#ccff00b0] text-white`}
             >
-              <Calendar className="h-5 w-5" />
-
-              {alreadyAdded
-                ? "Already Added"
-                : planIsFull
-                  ? "Plan Full"
-                  : "Add to today's plan"}
+              <Calendar className="h-5 w-5" /> Add to {`today's`} plan
             </button>
 
             {/* Save */}
             <button
               type="button"
               onClick={handleSaveWorkout}
-              disabled={alreadySaved}
-              className={`flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase transition ${
-                alreadySaved
-                  ? "cursor-not-allowed bg-gray-700 text-gray-400"
-                  : "bg-[#171a23] text-white hover:bg-[#20242f]"
-              }`}
+              className={`flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold  transition hover:bg-[#ccff0056]
+              `}
             >
               <Bookmark className="h-5 w-5" />
-
-              {alreadySaved ? "Saved" : "Save for later"}
+              Save for later
             </button>
           </div>
         </div>
