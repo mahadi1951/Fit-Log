@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useSyncExternalStore } from "react";
 
 import { Workout } from "@/types/apps.typs";
 
@@ -19,55 +19,108 @@ interface PlanContextType {
 
 const PlanContext = createContext<PlanContextType | undefined>(undefined);
 
+// Server Snapshot
+
+const EMPTY_WORKOUTS: Workout[] = [];
+
+// Storage Store
+
+type StoreListener = () => void;
+
+const createStorageStore = (key: string) => {
+  let value: Workout[] = [];
+  const listeners = new Set<StoreListener>();
+
+  const getSnapshot = () => {
+    return value;
+  };
+
+  const getServerSnapshot = () => {
+    return EMPTY_WORKOUTS;
+  };
+
+  const subscribe = (listener: StoreListener) => {
+    listeners.add(listener);
+
+    return () => {
+      listeners.delete(listener);
+    };
+  };
+
+  const load = () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      const storedData = localStorage.getItem(key);
+
+      if (storedData) {
+        value = JSON.parse(storedData) as Workout[];
+      } else {
+        value = [];
+      }
+
+      listeners.forEach((listener) => listener());
+    } catch (error) {
+      console.error(`Failed to load ${key}:`, error);
+
+      value = [];
+
+      listeners.forEach((listener) => listener());
+    }
+  };
+
+  const update = (newValue: Workout[]) => {
+    value = newValue;
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(key, JSON.stringify(newValue));
+    }
+
+    listeners.forEach((listener) => listener());
+  };
+
+  return {
+    getSnapshot,
+    getServerSnapshot,
+    subscribe,
+    load,
+    update,
+  };
+};
+
+// Create Stores
+
+const todaysPlanStore = createStorageStore("todaysPlan");
+
+const savedWorkoutsStore = createStorageStore("savedWorkouts");
+
+// Plan Provider
+
 export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
-  const [todaysPlan, setTodaysPlan] = useState<Workout[]>(() => {
-    if (typeof window === "undefined") {
-      return [];
-    }
+  const todaysPlan = useSyncExternalStore(
+    todaysPlanStore.subscribe,
+    todaysPlanStore.getSnapshot,
+    todaysPlanStore.getServerSnapshot,
+  );
 
-    try {
-      const savedPlan = localStorage.getItem("todaysPlan");
+  const savedWorkouts = useSyncExternalStore(
+    savedWorkoutsStore.subscribe,
+    savedWorkoutsStore.getSnapshot,
+    savedWorkoutsStore.getServerSnapshot,
+  );
 
-      return savedPlan ? JSON.parse(savedPlan) : [];
-    } catch (error) {
-      console.error("Failed to load today's plan:", error);
-      return [];
-    }
-  });
+  // Load localStorage after browser starts
 
-  const [savedWorkouts, setSavedWorkouts] = useState<Workout[]>(() => {
-    if (typeof window === "undefined") {
-      return [];
-    }
+  React.useEffect(() => {
+    todaysPlanStore.load();
+    savedWorkoutsStore.load();
+  }, []);
 
-    try {
-      const savedItems = localStorage.getItem("savedWorkouts");
+  // Add to Today's Plan
 
-      return savedItems ? JSON.parse(savedItems) : [];
-    } catch (error) {
-      console.error("Failed to load saved workouts:", error);
-      return [];
-    }
-  });
-
-  // Save Today's Plan
-  useEffect(() => {
-    localStorage.setItem(
-      "todaysPlan",
-      JSON.stringify(todaysPlan)
-    );
-  }, [todaysPlan]);
-
-  // Save Saved Workouts
-  useEffect(() => {
-    localStorage.setItem(
-      "savedWorkouts",
-      JSON.stringify(savedWorkouts)
-    );
-  }, [savedWorkouts]);
-
-  // Add workout to Today's Plan
-  const addToPlan = (workout: Workout) => {
+  const addToPlan = (workout: Workout): boolean => {
     if (todaysPlan.some((item) => item.id === workout.id)) {
       return false;
     }
@@ -76,42 +129,47 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
       return false;
     }
 
-    setTodaysPlan((previous) => [...previous, workout]);
+    todaysPlanStore.update([...todaysPlan, workout]);
 
     return true;
   };
 
-  // Remove workout from Today's Plan
+  // Remove from Today's Plan
+
   const removeFromPlan = (id: number) => {
-    setTodaysPlan((previous) =>
-      previous.filter((item) => item.id !== id)
-    );
+    const updatedPlan = todaysPlan.filter((item) => item.id !== id);
+
+    todaysPlanStore.update(updatedPlan);
   };
 
   // Check Today's Plan
+
   const isInPlan = (id: number) => {
     return todaysPlan.some((item) => item.id === id);
   };
 
-  // Save workout
-  const saveWorkout = (workout: Workout) => {
+  // Save Workout
+
+  const saveWorkout = (workout: Workout): boolean => {
     if (savedWorkouts.some((item) => item.id === workout.id)) {
       return false;
     }
 
-    setSavedWorkouts((previous) => [...previous, workout]);
+    savedWorkoutsStore.update([...savedWorkouts, workout]);
 
     return true;
   };
 
-  // Remove saved workout
+  // Remove Saved Workout
+
   const removeSavedWorkout = (id: number) => {
-    setSavedWorkouts((previous) =>
-      previous.filter((item) => item.id !== id)
-    );
+    const updatedSavedWorkouts = savedWorkouts.filter((item) => item.id !== id);
+
+    savedWorkoutsStore.update(updatedSavedWorkouts);
   };
 
-  // Check saved workout
+  // Check Saved Workout
+
   const isSaved = (id: number) => {
     return savedWorkouts.some((item) => item.id === id);
   };
@@ -121,11 +179,9 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         todaysPlan,
         savedWorkouts,
-
         addToPlan,
         removeFromPlan,
         isInPlan,
-
         saveWorkout,
         removeSavedWorkout,
         isSaved,
@@ -136,11 +192,13 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// usePlan Hook
+
 export const usePlan = () => {
   const context = useContext(PlanContext);
 
   if (!context) {
-    throw new Error("usePlan must be used inside PlanProvider");
+    throw new Error("usePlan must be used within a PlanProvider");
   }
 
   return context;

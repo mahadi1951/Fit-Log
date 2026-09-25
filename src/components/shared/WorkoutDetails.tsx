@@ -19,20 +19,20 @@ const WorkoutDetails: React.FC<WorkoutDetailsProps> = ({ workout }) => {
 
   const handleSaveWorkout = () => {
     if (alreadySaved) {
-      toast.info("Workout is already saved!");
+      toast.info(" Already saved!");
       return;
     }
 
     const saved = saveWorkout(workout);
 
     if (saved) {
-      toast.success("Workout saved for later!");
+      toast.success(" Saved for later!");
     }
   };
 
   const handleAddToPlan = () => {
     if (alreadyAdded) {
-      toast.info("Workout is already in today's plan!");
+      toast.info(" Already in today's plan!");
       return;
     }
 
@@ -44,7 +44,7 @@ const WorkoutDetails: React.FC<WorkoutDetailsProps> = ({ workout }) => {
     const added = addToPlan(workout);
 
     if (added) {
-      toast.success("Workout added to today's plan!");
+      toast.success(" Added to today's plan!");
     }
   };
 

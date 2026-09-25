@@ -7,12 +7,10 @@ const WorkoutDetailsPage = async ({
 }) => {
   const { id } = await params;
 
-  const res = await fetch(
-    `https://api.abcz.workers.dev/api/fitlog/${id}`
-  );
+  const res = await fetch(`https://api.abcz.workers.dev/api/fitlog/${id}`);
 
   if (!res.ok) {
-    throw new Error('Workout not found');
+    throw new Error("Workout not found");
   }
 
   const workout = await res.json();
