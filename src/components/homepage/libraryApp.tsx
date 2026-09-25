@@ -16,11 +16,11 @@ const LibraryApp = async () => {
     <div className="container mx-auto px-3 py-10 sm:px-5 lg:px-0">
       {/* Library Header */}
       <div>
-        <h2 className="max-w-[430px] text-3xl sm:text-4xl lg:text-[32px] leading-[0.9] font-black uppercase text-white">
+        <h2 className="max-w-[430px] text-3xl sm:text-4xl lg:text-[32px] leading-[0.9] font-black  text-white">
           THE LIBRARY
         </h2>
 
-        <p className="mt-4 max-w-[470px] text-[9px] sm:text-[10px] leading-4 text-gray-400">
+        <p className="mt-4  text-gray-400 text-sm mb-4 line-clamp-1">
           Twelve lifts covering every major muscle group.
         </p>
       </div>
