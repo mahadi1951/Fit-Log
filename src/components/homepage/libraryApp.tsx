@@ -15,7 +15,7 @@ const LibraryApp = async () => {
   return (
     <div className="container mx-auto px-3 py-10 sm:px-5 lg:px-0">
       {/* Library Header */}
-      <div>
+      <div className=" text-center lg:text-left md:text-left">
         <h2 className="max-w-[430px] text-3xl sm:text-4xl lg:text-[32px] leading-[0.9] font-black  text-white">
           THE LIBRARY
         </h2>
